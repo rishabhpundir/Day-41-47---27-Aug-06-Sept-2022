@@ -1,0 +1,83 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}Checkout{% endblock title %}
+{% block main-content %}
+<div class="container mb-5">
+  <div class="row mt-5">
+    <div class="col-sm-6">
+      <h4>Order Summary</h4>
+      <hr>
+      {% for item in cart_items %}
+      <div class="card mb-2">
+        <div class="card-body">
+          <h5>Product : {{item.product.title}}</h5>
+          <p>Quantity : {{item.quantity}}</p>
+          <p>Price : ₹{{item.item_price}}</p>
+          <small><b>Description : </b>{{item.product.description}}</small>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="col-sm-4 offset-sm-1">
+      <h3>Total (+ ₹70 Shipping) : <b>₹{{total_amount}}</b></h3>
+      </p>
+      <hr>
+      <h4>Select Shipping Address</h4>
+      <hr>
+      <form action="/payment" id="paymentform">
+        {% for item in addr %}
+        <div class="form-check mt-5 mb-1">
+          <input class="form-check-input" type="radio" name="custid" id="custadd{{forloop.counter}}"
+            value="{{item.id}}">
+          <label class="form-check-label fw-bold" for="custadd{{forloop.counter}}">
+            Address #{{forloop.counter}} </label>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <h5><b>{{item.name}}</b></h5>
+            <p>{{item.locality}}, {{item.city}}, {{item.state}} - {{item.pincode}}</p>
+          </div>
+        </div>
+        <div class="text-end">
+          <div id="paypal-button-container"></div>
+        </div>
+        {% endfor %}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock main-content %}
+{% block payment %}
+<script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
+
+    <script>
+        // Render the PayPal button into #paypal-button-container
+        paypal.Buttons({
+
+            // Set up the transaction
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: "{{total_amount}}"
+                        }
+                    }]
+                });
+            },
+
+            // Finalize the transaction
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(orderData) {
+                    // Successful capture! For demo purposes:
+                    console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+                    var transaction = orderData.purchase_units[0].payments.captures[0];
+                    alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
+                    document.getElementById('paymentform').submit();
+                });
+            }
+
+
+        }).render('#paypal-button-container');
+    </script>
+{% endblock payment %}

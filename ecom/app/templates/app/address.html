@@ -1,0 +1,34 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}Profile{% endblock title %}
+{% block main-content %}
+<div class="container my-5">
+    <div class="row">
+        <h4 class="mb-3">Welcome <span class='text-capitalize'>{{request.user}}</span></h4>
+        <hr>
+        <h2 class=" text-center mb-3"><b>Saved Addresses</b></h2>
+        <div class="col-sm-2 border-end">
+            <ul class="list-unstyled">
+                <li class="d-grid"><a href="{% url 'profile' %}" class="btn">Add Address</a></li>
+                <hr>
+                <li class="d-grid"><a href="{% url 'address' %}" class="btn {{active}}">Saved Address</a></li>
+            </ul>
+        </div>
+        <div class="col-sm-8 offset-sm-0">
+            <div class="row">
+                {% for address in addresses %}
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Address : {{address.id}}</h3>
+                            <p><b>Name :</b> {{address.name}}</p>
+                            <p><b>Details :</b> {{address.locality}}, {{address.city}}, {{address.state}} - {{address.pincode}}</p>
+                            <a href="{% url 'delete_address' address.id %}" class="btn btn-sm btn-danger mr-3">Remove</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endblock main-content %}
